@@ -120,16 +120,11 @@ where
 
 // This only runs in the unlikely event of a conversion error.
 fn create_conversion_error_response(err: String) -> Response {
-    let status = axum::http::StatusCode::INTERNAL_SERVER_ERROR;
-
-    Response::builder()
-        .status(status)
-        .header("content-type", "text/plain")
-        .body(Body::from(format!("Conversion error: {}", err)))
-        .unwrap_or_else(|_| {
-            Response::builder()
-                .status(status)
-                .body(Body::from("Critical error"))
-                .unwrap()
-        })
+    let mut response = Response::new(Body::from(format!("Conversion error: {}", err)));
+    response.headers_mut().insert(
+        "content-type",
+        axum::http::HeaderValue::from_static("text/plain"),
+    );
+    *response.status_mut() = axum::http::StatusCode::INTERNAL_SERVER_ERROR;
+    response
 }
